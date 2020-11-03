@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -28,8 +29,9 @@ namespace Deepportaled
         Graphics g1;
         Pen blackpen;
         Player player;
+        Brush blackbrush = new SolidBrush(Color.Black);
         Portal portal;
-        Font stand = new Font();
+        Font stand = new Font(FontFamily.GenericSansSerif, 20);
         public Form1()
         {
             InitializeComponent();
@@ -63,18 +65,55 @@ namespace Deepportaled
                 }
                
             }
+            //нахождения для каждой клетки её соседа
+            for (int i = 0; i < 16; i++)//i- комната у которой проверяем
+            {
+                for (int j = 0; j < 16; j++)
+                {
+                    //левая сторона 
+                    if ((rooms[i].verh.X == rooms[j].niz.X) &&(((rooms[i].verh.Y<= rooms[j].verh.Y) &&(rooms[i].niz.Y >= rooms[j].verh.Y))|| ((rooms[i].verh.Y <= rooms[j].niz.Y) && (rooms[i].niz.Y >= rooms[j].niz.Y))))
+                    {
 
+                        rooms[i].conected(j);
+                        rooms[i].conection++;
+                    }
+                    //нижняя
+                    if ((rooms[i].niz.Y == rooms[j].verh.Y) && (((rooms[i].niz.X >= rooms[j].niz.X) && (rooms[i].verh.X <= rooms[j].niz.X)) || ((rooms[i].niz.X >= rooms[j].verh.X) && (rooms[i].verh.X <= rooms[j].verh.X))))
+                    {
+
+                        rooms[i].conected(j);
+                        rooms[i].conection++;
+                    }
+                    //правая
+                    if ((rooms[i].niz.X == rooms[j].verh.X) && (((rooms[i].niz.Y >= rooms[j].niz.Y) && (rooms[i].verh.Y <= rooms[j].niz.Y)) || ((rooms[i].niz.Y >= rooms[j].verh.Y) && (rooms[i].verh.Y <= rooms[j].verh.Y))))
+                    {
+
+                        rooms[i].conected(j);
+                        rooms[i].conection++;
+                    }
+                    //верхняя
+                    if ((rooms[i].verh.Y == rooms[j].niz.Y) && (((rooms[i].verh.X <= rooms[j].verh.X) && (rooms[i].niz.X >= rooms[j].verh.X)) || ((rooms[i].verh.X <= rooms[j].niz.X) && (rooms[i].niz.X >= rooms[j].niz.X))))
+                    {
+
+                        rooms[i].conected(j);
+                        rooms[i].conection++;
+                    }
+                }
+            }
+
+            //тестовая отрисовка
             for (int i = 0; i < 16; i = i + 1)
             {
                 Point n = new Point((int)rooms[i].verh.X, (int)rooms[i].verh.Y);
                 Point m = new Point((int)rooms[i].niz.X, (int)rooms[i].verh.Y);
                 Point l = new Point((int)rooms[i].niz.X, (int)rooms[i].niz.Y);
                 Point k = new Point((int)rooms[i].verh.X, (int)rooms[i].niz.Y);
+                Point r = new Point((int)rooms[i].verh.X+((int)rooms[i].niz.X-(int)rooms[i].verh.X)/2, (int)rooms[i].verh.Y+((int)rooms[i].niz.Y- (int)rooms[i].verh.Y) / 2);
                 g.DrawLine(blackpen, m, n);
                 g.DrawLine(blackpen, n, k);
                 g.DrawLine(blackpen, k, l);
                 g.DrawLine(blackpen, l, m);
-                g.DrawString(i.ToString(),)
+                g.DrawString(rooms[i].conection.ToString(),stand,blackbrush,r);
             }
 
             portal = new Portal(rand.Next(scene.Height), rand.Next(scene.Width), rand.Next(scene.Height), rand.Next(scene.Width));
@@ -82,8 +121,14 @@ namespace Deepportaled
         
         public class room
         {
-            
+            public int[] conect=new int[15];
+            public int conection;
             public PointF verh, niz;
+            public void conected(int conect_)
+            {
+                
+                this.conect[conection] = conect_;
+            }
             public room(float verhy, float verhx, float nizy, float nizx)
             {
                 this.verh.X = verhx;
