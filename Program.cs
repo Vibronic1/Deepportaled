@@ -12,6 +12,7 @@ namespace Deepportaled
         /// Главная точка входа для приложения.
         /// </summary>
         [STAThread]
+
         static void Main()
         {
             Application.EnableVisualStyles();

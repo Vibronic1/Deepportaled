@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,59 +17,179 @@ namespace Deepportaled
     public partial class Form1 : Form
     {
 
-        
+
         // Ресурсы игры
+
+        public static Random rand = new Random();
         int gameTime = 0;
         Bitmap scene;
         Graphics g;
+        Bitmap map;
+        Graphics g1;
         Pen blackpen;
         Player player;
-        int[,] map;
         Portal portal;
+        Font stand = new Font();
         public Form1()
         {
             InitializeComponent();
-            GameTimer.Interval = 1000 / 30;
+            GameTimer.Interval = 1000 / 60;
             GameTimer.Start();
             scene = new Bitmap(canvas.Width, canvas.Height);
+            map = new Bitmap(canvas.Width, canvas.Height);
             g = Graphics.FromImage(scene);
+            g1 = Graphics.FromImage(map);
             blackpen = new Pen(Color.Black);
             player = new Player(new PointF(scene.Width / 2, scene.Height / 2));
 
 
 
             //генерация карты
-            map = new int[canvas.Width, canvas.Height];
-            Random rand = new Random();
-            portal = new Portal(rand.Next(0, scene.Width), rand.Next(0, scene.Height), rand.Next(0, scene.Width), rand.Next(0, scene.Height));
-        }
+            //разбиение карты на комнаты
+            room[] rooms = new room[16];
+            rooms[0] = new room(10,10,scene.Height-10,scene.Width-10);
+            
+            
+            for (int j = 4; j > 0; j--)
+            {
+                for (int i = 0; i < 16; i = i + (int)Math.Pow(2, j))
+                {
+                     rooms[i + (int)Math.Pow(2, j - 1)] = rooms[i].dilenie();
+                        
+                    
+                    
+                    
 
+                }
+               
+            }
+
+            for (int i = 0; i < 16; i = i + 1)
+            {
+                Point n = new Point((int)rooms[i].verh.X, (int)rooms[i].verh.Y);
+                Point m = new Point((int)rooms[i].niz.X, (int)rooms[i].verh.Y);
+                Point l = new Point((int)rooms[i].niz.X, (int)rooms[i].niz.Y);
+                Point k = new Point((int)rooms[i].verh.X, (int)rooms[i].niz.Y);
+                g.DrawLine(blackpen, m, n);
+                g.DrawLine(blackpen, n, k);
+                g.DrawLine(blackpen, k, l);
+                g.DrawLine(blackpen, l, m);
+                g.DrawString(i.ToString(),)
+            }
+
+            portal = new Portal(rand.Next(scene.Height), rand.Next(scene.Width), rand.Next(scene.Height), rand.Next(scene.Width));
+        }
+        
+        public class room
+        {
+            
+            public PointF verh, niz;
+            public room(float verhy, float verhx, float nizy, float nizx)
+            {
+                this.verh.X = verhx;
+                this.verh.Y = verhy;
+                this.niz.X = nizx;
+                this.niz.Y = nizy;
+            }
+            public room dilenie()
+            {
+                
+                int delitel;
+                room ret=new room(verh.Y,verh.X,niz.Y,niz.X);
+                int napravlenie = rand.Next(0, 2);
+               
+                if ((((Math.Abs(verh.X - ((int)verh.X + (int)((niz.X - verh.X) / 100 * 30))) / Math.Abs(verh.Y - niz.Y)) > 3) || ((Math.Abs(verh.X - ((int)verh.X + (int)((niz.X - verh.X) / 100 * 30))) / Math.Abs(verh.Y - niz.Y)) < 0.333)))
+                {
+                    do
+                    {
+                        delitel = rand.Next((int)verh.Y + (int)((niz.Y - verh.Y) / 100 * 30), (int)verh.Y + (int)((niz.Y - verh.Y) / 100 * 70));
+                        ret = new room(delitel, verh.X, niz.Y, niz.X);
+                    }
+                    while ((((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) > 3) || ((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) < 0.333)) || (((Math.Abs(verh.X - niz.X) / Math.Abs(verh.Y - delitel)) > 3) || ((Math.Abs(verh.X - niz.X) / Math.Abs(verh.Y - delitel)) < 0.333)));
+
+
+                    niz.Y = delitel;
+
+                    return (ret);
+                }
+                else if ((((Math.Abs(verh.X - niz.X) / Math.Abs(verh.Y - ((int)verh.Y + (int)((niz.Y - verh.Y) / 100 * 50)))) > 3) || ((Math.Abs(verh.X - niz.X) / Math.Abs(verh.Y - ((int)verh.Y + (int)((niz.Y - verh.Y) / 100 * 50)))) < 0.333)))
+                {
+                    do
+                    {
+                        delitel = rand.Next((int)verh.X + (int)((niz.X - verh.X) / 100 * 30), (int)verh.X + (int)((niz.X - verh.X) / 100 * 70));
+                        ret = new room(verh.Y, delitel, niz.Y, niz.X);
+                    }
+                    while ((((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) > 3) || ((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) < 0.333)) || (((Math.Abs(verh.X - delitel) / Math.Abs(verh.Y - niz.Y)) > 3) || ((Math.Abs(verh.X - delitel) / Math.Abs(verh.Y - niz.Y)) < 0.333)));
+
+
+                    niz.X = delitel;
+
+                    return (ret);
+                }
+                else
+                { switch (napravlenie)
+                    {
+                        case 0:
+                            do
+                            {
+                                delitel = rand.Next((int)verh.X + (int)((niz.X - verh.X) / 100 * 30), (int)verh.X + (int)((niz.X - verh.X) / 100 * 70));
+                                ret = new room(verh.Y, delitel, niz.Y, niz.X);
+                            }
+                            while ((((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) > 3) || ((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) < 0.333)) || (((Math.Abs(verh.X - delitel) / Math.Abs(verh.Y - niz.Y)) > 3) || ((Math.Abs(verh.X - delitel) / Math.Abs(verh.Y - niz.Y)) < 0.333)));
+
+                            
+                            niz.X = delitel;
+
+                            return (ret);
+
+                        case 1:
+                            do
+                            {
+                                delitel = rand.Next((int)verh.Y + (int)((niz.Y - verh.Y) / 100 * 30), (int)verh.Y + (int)((niz.Y - verh.Y) / 100 * 70));
+                                ret = new room(delitel, verh.X, niz.Y, niz.X);
+                            }
+                            while ((((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) > 3) || ((Math.Abs(ret.verh.X - ret.niz.X) / Math.Abs(ret.verh.Y - ret.niz.Y)) < 0.333)) || (((Math.Abs(verh.X - niz.X) / Math.Abs(verh.Y - delitel)) > 3) || ((Math.Abs(verh.X - niz.X) / Math.Abs(verh.Y - delitel)) < 0.333)));
+
+
+                            niz.Y = delitel;
+
+                            return (ret);
+
+                    }
+                }
+                return (ret);
+            }
+        }
+       
         private void GameTimer_Tick(object sender, EventArgs e)
         {
             
-            int i=0;
-            int j = 0;
-            if (gameTime % 8 == 0)
-            {
-                g.Clear(Color.White);
-                g.DrawImage(portal.model[0], portal.pos);
-                g.DrawImage(portal.model[2], portal.poss);
-            }
-            else if(gameTime % 4 == 0)
-            {
-                g.Clear(Color.White);
-                g.DrawImage(portal.model[1], portal.pos);
-                g.DrawImage(portal.model[1], portal.poss);
-            }
-            else if(gameTime % 2 == 0)
-            {
-                g.Clear(Color.White);
-                g.DrawImage(portal.model[2], portal.pos);
-                g.DrawImage(portal.model[0], portal.poss);
-            }
-          
-            canvas.Image = scene;
-            gameTime++;
+            
+            //if (gameTime % 8 == 0)
+            //{
+            //    g.Clear(Color.White);
+                
+            //    g.DrawImage(portal.model[0], portal.pos);
+            //    g.DrawImage(portal.model[2], portal.poss);
+            //}
+            //else if (gameTime % 4 == 0)
+            //{
+            //    g.Clear(Color.White);
+                
+            //    g.DrawImage(portal.model[1], portal.pos);
+            //    g.DrawImage(portal.model[1], portal.poss);
+            //}
+            //else if (gameTime % 2 == 0)
+            //{
+            //    g.Clear(Color.White);
+                
+            //    g.DrawImage(portal.model[2], portal.pos);
+            //    g.DrawImage(portal.model[0], portal.poss);
+            //}
+            
+
+                canvas.Image = scene;
+            //gameTime++;
         }
     }
     class Player
@@ -83,6 +205,7 @@ namespace Deepportaled
 
 
     }
+    
     class Portal
     {
         int Size = 50;
@@ -90,9 +213,9 @@ namespace Deepportaled
         public PointF poss;
         public void portal_enter(Player player)
         {
-            if ((Math.Abs(player.pos.X- poss.X)<25)&& (Math.Abs(player.pos.Y - poss.Y) < 25)) { player.pos = pos; }else if ((Math.Abs(player.pos.X - pos.X) < 25) && (Math.Abs(player.pos.Y - pos.Y) < 25)) { player.pos = poss; }
+            if ((Math.Abs(player.pos.X- poss.X+25)<25)&& (Math.Abs(player.pos.Y - poss.Y+25) < 25)) { player.pos = pos; }else if ((Math.Abs(player.pos.X - pos.X) < 25) && (Math.Abs(player.pos.Y - pos.Y) < 25)) { player.pos = poss; }
         }
-        public Portal(float posx,float possx, float posy, float possy)
+        public Portal(float posy, float posx, float possy, float possx)
         {
             this.pos.X = posx;
             this.poss.X = possx;
