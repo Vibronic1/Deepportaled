@@ -48,7 +48,7 @@ namespace Deepportaled
 
             //генерация карты
             //разбиение карты на комнаты
-            room[] rooms = new room[16];
+             room[] rooms = new room[16];
             rooms[0] = new room(10,10,scene.Height-10,scene.Width-10);
             
             
@@ -100,6 +100,126 @@ namespace Deepportaled
                     }
                 }
             }
+            //room vrem;
+            //уменьшение комнат дабы создать пространство между ними и там в дальнейшем развернуть клеточный автомат...
+            for (int i = 0; i < 16; i++)
+            {
+                room vrem;
+                vrem = rooms[i];
+                rooms[i].verh.X = vrem.verh.X + (vrem.niz.X - vrem.verh.X)/100*rand.Next(15,30);
+                rooms[i].verh.Y = vrem.verh.Y + (vrem.niz.Y - vrem.verh.Y) / 100 * rand.Next(15, 30);
+                rooms[i].niz.X= vrem.niz.X- (vrem.niz.X - vrem.verh.X) / 100 * rand.Next(15, 30);
+                rooms[i].niz.Y= vrem.niz.Y- (vrem.niz.Y - vrem.verh.Y) / 100 * rand.Next(15, 30);
+            }
+
+            //присвоение формы каждой комнате исходя из кол-ва её соседей(отказ от этой идеи, закоменчено)
+            //for (int i = 0; i < 16; i++)
+            //{
+            //    switch (rooms[i].conection)
+            //    {
+            //        case 1:
+            //        case 2:
+            //            rooms[i].vnyt[1].Y = rooms[i].niz.Y;
+            //            rooms[i].vnyt[1].X = rooms[i].niz.X - (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+
+            //            break;
+            //        case 3:
+            //        case 4:
+            //            rooms[i].vnyt[1].Y = rooms[i].niz.Y;
+            //            rooms[i].vnyt[1].X = rooms[i].niz.X - (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[0].Y = rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 100 * rand.Next(30, 60);
+            //            rooms[i].vnyt[0].X = rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(30, 60);
+
+            //            break;
+            //        case 5:
+            //        case 6:
+            //            rooms[i].vnyt[1].Y = rooms[i].niz.Y;
+            //            rooms[i].vnyt[1].X = rooms[i].niz.X - (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[0].Y = rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[0].X = rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[2].Y = rooms[i].niz.Y - (rooms[i].niz.Y - rooms[i].verh.Y) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[2].X = rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            break;
+            //        case 7:
+            //        case 8:
+            //            rooms[i].vnyt[1].Y = rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[1].X = rooms[i].niz.X - (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[0].Y = rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[0].X = rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[2].Y = rooms[i].niz.Y - (rooms[i].niz.Y - rooms[i].verh.Y) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[2].X = rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[3].Y = rooms[i].niz.Y - (rooms[i].niz.Y - rooms[i].verh.Y) / 100 * rand.Next(15, 30);
+            //            rooms[i].vnyt[3].X = rooms[i].niz.X - (rooms[i].niz.X - rooms[i].verh.X) / 100 * rand.Next(15, 30);
+            //            break;
+
+            //    }
+            //}
+            //Переход от абстрактных комнат к карте boolmap, состоящей из пикселей
+            bool[,] boolmap = new bool[scene.Height, scene.Width];
+                for(int i = 0; i < scene.Height; i++)
+            {
+
+                for (int j = 0; j < scene.Width; j++)
+                {
+                    boolmap[i, j] = true;
+                }
+
+            }
+                for(int i = 0; i < 16; i++)
+            {
+                for(int h=(int)rooms[i].verh.Y;h< rooms[i].niz.Y; h++)
+                {
+                    for (int w = (int)rooms[i].verh.X; w < rooms[i].niz.X; w++)
+                    {
+                        boolmap[h, w] = false;
+                    }
+                }
+            }
+            //создаение проходов между комнатами
+            int[] vrem1 = new int[16];
+            int size = 0;
+            int randomka;
+            
+            vrem1[size] = rand.Next(16);
+            rooms[vrem1[size]].peseheno = true;
+            size++;
+            while (size != 0)
+            {
+                size--;
+                int tekush = vrem1[size];
+                
+
+
+
+
+                randomka = rand.Next(rooms[tekush].conection);
+                if (rooms[rooms[tekush].conect[randomka]].peseheno) {
+                    for (int o = 0; o < rooms[tekush].conection; o++) {
+                        if (rooms[rooms[tekush].conect[o]].peseheno) { } else { 
+
+                            vrem1[size] = tekush;
+                        size++;
+                            break;
+                    } } }
+                else
+                {
+                    vrem1[size] = tekush;
+                    size++;
+                    rooms[tekush].soedinen[rooms[tekush].soedinenie] = rooms[tekush].conect[randomka];
+                    rooms[tekush].soedinenie++;
+
+                    tekush = rooms[tekush].conect[randomka];
+                    rooms[tekush].peseheno = true;
+                    vrem1[size] = tekush;
+                    size++;
+                    
+                }
+                    
+                
+            }
+            //разбрасывание рандомных "клеток" для клеточного автомата
+
+            //развертвование клеточного автомата
 
             //тестовая отрисовка
             for (int i = 0; i < 16; i = i + 1)
@@ -108,12 +228,21 @@ namespace Deepportaled
                 Point m = new Point((int)rooms[i].niz.X, (int)rooms[i].verh.Y);
                 Point l = new Point((int)rooms[i].niz.X, (int)rooms[i].niz.Y);
                 Point k = new Point((int)rooms[i].verh.X, (int)rooms[i].niz.Y);
-                Point r = new Point((int)rooms[i].verh.X+((int)rooms[i].niz.X-(int)rooms[i].verh.X)/2, (int)rooms[i].verh.Y+((int)rooms[i].niz.Y- (int)rooms[i].verh.Y) / 2);
-                g.DrawLine(blackpen, m, n);
-                g.DrawLine(blackpen, n, k);
-                g.DrawLine(blackpen, k, l);
+                Point r = new Point((int)rooms[i].verh.X + ((int)rooms[i].niz.X - (int)rooms[i].verh.X) / 2, (int)rooms[i].verh.Y + ((int)rooms[i].niz.Y - (int)rooms[i].verh.Y) / 2);
+                
+                
+                g.DrawString(rooms[i].conection.ToString(), stand, blackbrush, r);
+                
+                for (int y=0;y< rooms[i].soedinenie;y++)
+                {
+                    Point r1 = new Point((int)rooms[rooms[i].soedinen[y]].verh.X + ((int)rooms[rooms[i].soedinen[y]].niz.X - (int)rooms[rooms[i].soedinen[y]].verh.X) / 2, (int)rooms[rooms[i].soedinen[y]].verh.Y + ((int)rooms[rooms[i].soedinen[y]].niz.Y - (int)rooms[rooms[i].soedinen[y]].verh.Y) / 2);
+                    g.DrawLine(blackpen, r, r1);
+                }
+                g.DrawLine(blackpen, n, m);
                 g.DrawLine(blackpen, l, m);
-                g.DrawString(rooms[i].conection.ToString(),stand,blackbrush,r);
+                g.DrawLine(blackpen, l, k);
+                g.DrawLine(blackpen, n, k);
+
             }
 
             portal = new Portal(rand.Next(scene.Height), rand.Next(scene.Width), rand.Next(scene.Height), rand.Next(scene.Width));
@@ -124,6 +253,9 @@ namespace Deepportaled
             public int[] conect=new int[15];
             public int conection;
             public PointF verh, niz;
+            public bool peseheno = false;
+            public int[] soedinen = new int[15];
+            public int soedinenie = 0;
             public void conected(int conect_)
             {
                 
@@ -208,33 +340,33 @@ namespace Deepportaled
        
         private void GameTimer_Tick(object sender, EventArgs e)
         {
-            
-            
+
+
             //if (gameTime % 8 == 0)
             //{
             //    g.Clear(Color.White);
-                
+
             //    g.DrawImage(portal.model[0], portal.pos);
             //    g.DrawImage(portal.model[2], portal.poss);
             //}
             //else if (gameTime % 4 == 0)
             //{
             //    g.Clear(Color.White);
-                
+
             //    g.DrawImage(portal.model[1], portal.pos);
             //    g.DrawImage(portal.model[1], portal.poss);
             //}
             //else if (gameTime % 2 == 0)
             //{
             //    g.Clear(Color.White);
-                
+
             //    g.DrawImage(portal.model[2], portal.pos);
             //    g.DrawImage(portal.model[0], portal.poss);
             //}
-            
 
+            
                 canvas.Image = scene;
-            //gameTime++;
+            gameTime++;
         }
     }
     class Player
