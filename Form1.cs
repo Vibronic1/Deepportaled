@@ -290,22 +290,140 @@ namespace Deepportaled
                             }
                         }
                     }
-                    else
-                    {
-                        if (((rooms[rooms[i].soedinen[q]].verh.Y + (rooms[rooms[i].soedinen[q]].niz.Y - rooms[rooms[i].soedinen[q]].verh.Y) / 2) - (rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 2)) > 0)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                    } 
+                    //добавть исход, если комнаты находятся на одной линии
                 }
             }
 
             //разбрасывание рандомных "клеток" для клеточного автомата
+            for (int i = 0; i < 16; i++)
+            {
+                for (int h = (int)rooms[i].verh.Y-10; h < rooms[i].niz.Y+10; h++)
+                {
+                    
+                    for (int w = (int)rooms[i].verh.X-10; w < rooms[i].niz.X+10; w++)
+                    {
+                        if (((h< (int)rooms[i].verh.Y) ||(h> rooms[i].niz.Y)) ||((w< (int)rooms[i].verh.X) ||(w> rooms[i].niz.X)))
+                        {
+                            if (rand.Next(100) > 35)
+                            {
+                                boolmap[h, w] = false;
+                            }
+                        }
+                    }
+                }
+                //
 
+                //
+                for (int q = 0; q < rooms[i].soedinenie; q++)
+                {
+                    PointF first = new PointF((rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 2), (rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 2));
+                    PointF second = new PointF((rooms[rooms[i].soedinen[q]].verh.X + (rooms[rooms[i].soedinen[q]].niz.X - rooms[rooms[i].soedinen[q]].verh.X) / 2), (rooms[rooms[i].soedinen[q]].verh.Y + (rooms[rooms[i].soedinen[q]].niz.Y - rooms[rooms[i].soedinen[q]].verh.Y) / 2));
+                    if ((second.X - first.X) > 0)
+                    {
+                        if ((second.Y - first.Y) > 0)
+                        {
+                            Double otnoshenie_storon = (second.X - first.X) / ((second.Y - first.Y));
+                            //если х>y
+                            if (1 < (otnoshenie_storon))
+                            {
+                                int v = (int)first.Y;
+                                for (int w = (int)first.X; w < second.X; w++)
+                                {
+                                    while ((v < second.Y) && ((w - first.X) > otnoshenie_storon * (v - first.Y))) { v++; }
+                                    for (int e = -30; e < -15; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[v + e, w] = false;
+                                        }
+                                    }
+                                    for (int e = 15; e < 30; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[v + e, w] = false;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                otnoshenie_storon = (second.Y - first.Y) / (second.X - first.X);
+                                int v = (int)first.X;
+                                for (int w = (int)first.Y; w < second.Y; w++)
+                                {
+                                    while ((v < second.X) && ((w - first.Y) > otnoshenie_storon * (v - first.X))) { v++; }
+                                    for (int e = -30; e < -15; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[w, v + e] = false;
+                                        }
+                                    }
+                                    for (int e = 15; e < 30; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[w, v + e] = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {//ecли first.y>second.y
+                            Double otnoshenie_storon = (second.X - first.X) / ((first.Y - second.Y));
+
+                            if (1 < (otnoshenie_storon))
+                            {
+                                int v = (int)first.Y;
+                                for (int w = (int)first.X; w < second.X; w++)
+                                {
+                                    while ((v > second.Y) && ((w - first.X) > otnoshenie_storon * Math.Abs(v - first.Y))) { v--; }
+                                    for (int e = -30; e < -15; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[v + e, w] = false;
+                                        }
+                                    }
+                                    for (int e = 15; e < 30; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[v + e, w] = false;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                otnoshenie_storon = (first.Y - second.Y) / (second.X - first.X);
+                                int v = (int)first.X;
+                                for (int w = (int)first.Y; w > second.Y; w--)
+                                {
+                                    while ((v < second.X) && (Math.Abs(w - first.Y) > otnoshenie_storon * (v - first.X))) { v++; }
+                                    for (int e = -30; e < -15; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[w, v + e] = false;
+                                        }
+                                    }
+                                    for (int e = 15; e < 30; e++)
+                                    {
+                                        if (rand.Next(100) > 35)
+                                        {
+                                            boolmap[w, v + e] = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //добавть исход, если комнаты находятся на одной линии
+                }
+            }
             //развертвование клеточного автомата
 
             //тестовая отрисовка в map
