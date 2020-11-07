@@ -154,27 +154,7 @@ namespace Deepportaled
 
             //    }
             //}
-            //Переход от абстрактных комнат к карте boolmap, состоящей из пикселей
-            bool[,] boolmap = new bool[scene.Height, scene.Width];
-                for(int i = 0; i < scene.Height; i++)
-            {
-
-                for (int j = 0; j < scene.Width; j++)
-                {
-                    boolmap[i, j] = true;
-                }
-
-            }
-                for(int i = 0; i < 16; i++)
-            {
-                for(int h=(int)rooms[i].verh.Y;h< rooms[i].niz.Y; h++)
-                {
-                    for (int w = (int)rooms[i].verh.X; w < rooms[i].niz.X; w++)
-                    {
-                        boolmap[h, w] = false;
-                    }
-                }
-            }
+            
             //создаение проходов между комнатами
             int[] vrem1 = new int[16];
             int size = 0;
@@ -207,7 +187,8 @@ namespace Deepportaled
                     size++;
                     rooms[tekush].soedinen[rooms[tekush].soedinenie] = rooms[tekush].conect[randomka];
                     rooms[tekush].soedinenie++;
-
+                    rooms[rooms[tekush].conect[randomka]].soedinen[rooms[rooms[tekush].conect[randomka]].soedinenie] = tekush;
+                    rooms[rooms[tekush].conect[randomka]].soedinenie++;
                     tekush = rooms[tekush].conect[randomka];
                     rooms[tekush].peseheno = true;
                     vrem1[size] = tekush;
@@ -217,11 +198,135 @@ namespace Deepportaled
                     
                 
             }
+            //Переход от абстрактных комнат к карте boolmap, состоящей из пикселей
+            bool[,] boolmap = new bool[scene.Height, scene.Width];
+            for (int i = 0; i < scene.Height; i++)
+            {
+
+                for (int j = 0; j < scene.Width; j++)
+                {
+                    boolmap[i, j] = true;
+                }
+
+            }
+            //
+            
+            for (int i = 0; i < 16; i++)
+            {
+                for (int h = (int)rooms[i].verh.Y; h < rooms[i].niz.Y; h++)
+                {
+                    for (int w = (int)rooms[i].verh.X; w < rooms[i].niz.X; w++)
+                    {
+                        boolmap[h, w] = false;
+                    }
+                }
+                //
+                
+                //
+                for (int q = 0; q < rooms[i].soedinenie; q++)
+                {
+                    PointF first = new PointF((rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 2), (rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 2));
+                    PointF second = new PointF((rooms[rooms[i].soedinen[q]].verh.X + (rooms[rooms[i].soedinen[q]].niz.X - rooms[rooms[i].soedinen[q]].verh.X) / 2), (rooms[rooms[i].soedinen[q]].verh.Y + (rooms[rooms[i].soedinen[q]].niz.Y - rooms[rooms[i].soedinen[q]].verh.Y) / 2));
+                    if ((second.X -first.X ) > 0)
+                    {
+                        if ((second.Y - first.Y) > 0)
+                        {
+                            Double otnoshenie_storon = (second.X - first.X) / ((second.Y - first.Y));
+                            //если х>y
+                            if (1 < (otnoshenie_storon))
+                            {
+                                int v = (int)first.Y;
+                                for (int w = (int)first.X; w < second.X; w++)
+                                {
+                                    while ((v < second.Y) && ((w - first.X) > otnoshenie_storon * (v - first.Y))) { v++; }
+                                    for (int e = -15; e < 16; e++)
+                                    {
+                                        boolmap[v + e, w] = false;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                otnoshenie_storon = (second.Y - first.Y)/(second.X - first.X);
+                                int v = (int)first.X;
+                                for (int w = (int)first.Y; w < second.Y; w++)
+                                {
+                                    while ((v < second.X) && ((w - first.Y) > otnoshenie_storon * (v - first.X )) ){ v++; }
+                                    for (int e = -15; e < 16; e++)
+                                    {
+                                        boolmap[w, v + e] = false;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {//ecли first.y>second.y
+                            Double otnoshenie_storon = (second.X - first.X) / ((first.Y- second.Y));
+                            
+                            if (1 < (otnoshenie_storon))
+                            {
+                                int v = (int)first.Y;
+                                for (int w = (int)first.X; w < second.X; w++)
+                                {
+                                    while ((v > second.Y) && ((w - first.X) > otnoshenie_storon * Math.Abs(v - first.Y))) { v--; }
+                                    for (int e = -15; e < 16; e++)
+                                    {
+                                        boolmap[v + e, w] = false;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                otnoshenie_storon = (first.Y-second.Y ) / (second.X - first.X);
+                                int v = (int)first.X;
+                                for (int w = (int)first.Y; w > second.Y; w--)
+                                {
+                                    while ((v < second.X) && (Math.Abs(w - first.Y) > otnoshenie_storon * (v - first.X))) { v++; }
+                                    for (int e = -15; e < 16; e++)
+                                    {
+                                        boolmap[w, v + e] = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (((rooms[rooms[i].soedinen[q]].verh.Y + (rooms[rooms[i].soedinen[q]].niz.Y - rooms[rooms[i].soedinen[q]].verh.Y) / 2) - (rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 2)) > 0)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
+                    } 
+                }
+            }
+
             //разбрасывание рандомных "клеток" для клеточного автомата
 
             //развертвование клеточного автомата
 
-            //тестовая отрисовка
+            //тестовая отрисовка в map
+            for (int i = 10; i < scene.Height; i = i + 1)
+            {
+                for (int j = 10; j < scene.Width; j++)
+                {
+                    Point n = new Point(j, i);
+
+                    while ((j < scene.Width) && (boolmap[i, j]))
+                    {
+                        j++;
+                    }
+                    Point m = new Point(j, i);
+                    g1.DrawLine(blackpen, n, m);
+
+                    j++;
+
+                }
+            }
+            //тесты
             for (int i = 0; i < 16; i = i + 1)
             {
                 Point n = new Point((int)rooms[i].verh.X, (int)rooms[i].verh.Y);
@@ -244,6 +349,7 @@ namespace Deepportaled
                 g.DrawLine(blackpen, n, k);
 
             }
+            
 
             portal = new Portal(rand.Next(scene.Height), rand.Next(scene.Width), rand.Next(scene.Height), rand.Next(scene.Width));
         }
@@ -364,9 +470,11 @@ namespace Deepportaled
             //    g.DrawImage(portal.model[0], portal.poss);
             //}
 
-            
-                canvas.Image = scene;
-            gameTime++;
+
+            if (gameTime % 200 == 0)
+                {  canvas.Image = scene;}else if (gameTime % 100 == 0){
+                canvas.Image = map;}
+                gameTime++;
         }
     }
     class Player
