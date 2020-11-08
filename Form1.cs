@@ -20,7 +20,7 @@ namespace Deepportaled
 
 
         // Ресурсы игры
-
+        public int portal_kolvo = 0;
         public static Random rand = new Random();
         int gameTime = 0;
         Bitmap scene;
@@ -30,7 +30,7 @@ namespace Deepportaled
         Pen blackpen;
         Player player;
         Brush blackbrush = new SolidBrush(Color.Black);
-        Portal portal;
+        Portal[] portal = new Portal[10];
         Font stand = new Font(FontFamily.GenericSansSerif, 20);
         public Form1()
         {
@@ -163,25 +163,53 @@ namespace Deepportaled
             vrem1[size] = rand.Next(16);
             rooms[vrem1[size]].peseheno = true;
             size++;
+            PointF nach_portal = new PointF();
+            bool nach = false;
+            bool vilet = false;
+            int prosh=vrem1[size-1];
+           
             while (size != 0)
             {
                 size--;
                 int tekush = vrem1[size];
-                
 
 
 
+                vilet = false;
 
                 randomka = rand.Next(rooms[tekush].conection);
                 if (rooms[rooms[tekush].conect[randomka]].peseheno) {
+                    
                     for (int o = 0; o < rooms[tekush].conection; o++) {
                         if (rooms[rooms[tekush].conect[o]].peseheno) { } else { 
 
                             vrem1[size] = tekush;
                         size++;
-                            //сюды засунуть генерацию портала
+                            prosh = tekush;
+                            vilet = true;
+                           
                             break;
-                    } } }
+                    } }
+                    if (prosh == vrem1[size])
+                    {
+                        if (vilet) { }
+                        else
+                        {
+                            if (nach)
+                            {
+                                portal[portal_kolvo] = new Portal(nach_portal.Y, nach_portal.X, (rooms[tekush].verh.Y + (rooms[tekush].niz.Y - rooms[tekush].verh.Y) / 2), (rooms[tekush].verh.X + (rooms[tekush].niz.X - rooms[tekush].verh.X) / 2));
+                                nach = false;
+                                portal_kolvo++;
+                            }
+                            else
+                            {
+                                nach = true;
+                                nach_portal.X = (rooms[tekush].verh.X + (rooms[tekush].niz.X - rooms[tekush].verh.X) / 2);
+                                nach_portal.Y = (rooms[tekush].verh.Y + (rooms[tekush].niz.Y - rooms[tekush].verh.Y) / 2);
+                            }
+                        }
+                    }
+                }
                 else
                 {
                     vrem1[size] = tekush;
@@ -194,7 +222,8 @@ namespace Deepportaled
                     rooms[tekush].peseheno = true;
                     vrem1[size] = tekush;
                     size++;
-                    
+                    prosh = tekush;
+
                 }
                     
                 
@@ -233,6 +262,7 @@ namespace Deepportaled
                         if ((second.Y - first.Y) > 0)
                         {
                             Double otnoshenie_storon = (second.X - first.X) / ((second.Y - first.Y));
+
                             //если х>y
                             if (1 < (otnoshenie_storon))
                             {
@@ -243,7 +273,10 @@ namespace Deepportaled
                                     for (int e = -15; e < 16; e++)
                                     {
                                         boolmap[v + e, w] = false;
+
+                                        
                                     }
+                                    
                                 }
                             }
                             else
@@ -576,7 +609,7 @@ namespace Deepportaled
             //}
 
 
-            portal = new Portal(rand.Next(scene.Height), rand.Next(scene.Width), rand.Next(scene.Height), rand.Next(scene.Width));
+           
         }
         
         public class room
@@ -668,39 +701,84 @@ namespace Deepportaled
                 return (ret);
             }
         }
-       
+
         private void GameTimer_Tick(object sender, EventArgs e)
         {
+            if (gameTime % 8 == 0)
+            {
+                g.Clear(Color.White);
+                g.DrawImage(map, 0, 0);
 
 
-            //if (gameTime % 8 == 0)
+            }
+            else if (gameTime % 4 == 0)
+            {
+                g.Clear(Color.White);
+                g.DrawImage(map, 0, 0);
+
+
+            }
+            else if (gameTime % 2 == 0)
+            {
+                g.Clear(Color.White);
+                g.DrawImage(map, 0, 0);
+
+
+            }
+
+            for (int i = 0; i < portal_kolvo; i++)
+            {
+
+              
+                if (gameTime % 8 == 0)
+                {
+                   
+                    g.DrawImage(portal[i].model[0], portal[i].pos);
+                    g.DrawImage(portal[i].model[2], portal[i].poss);
+                   
+                }
+                else if (gameTime % 4 == 0)
+                {
+                   
+                    g.DrawImage(portal[i].model[1], portal[i].pos);
+                    g.DrawImage(portal[i].model[1], portal[i].poss);
+                    
+                }
+                else if (gameTime % 2 == 0)
+                {
+                    
+                    g.DrawImage(portal[i].model[2], portal[i].pos);
+                    g.DrawImage(portal[i].model[0], portal[i].poss);
+                   
+                }
+            }
+            if (gameTime % 8 == 0)
+            {
+               
+
+                canvas.Image = scene;
+            }
+            else if (gameTime % 4 == 0)
+            {
+                
+                canvas.Image = scene;
+            }
+            else if (gameTime % 2 == 0)
+            {
+               
+                canvas.Image = scene;
+            }
+            //if (gameTime % 400 == 0)
+            //{ canvas.Image = scene; }
+            //else if (gameTime % 200 == 0)
             //{
-            //    g.Clear(Color.White);
-
-            //    g.DrawImage(portal.model[0], portal.pos);
-            //    g.DrawImage(portal.model[2], portal.poss);
+            //    canvas.Image = map;
             //}
-            //else if (gameTime % 4 == 0)
-            //{
-            //    g.Clear(Color.White);
-
-            //    g.DrawImage(portal.model[1], portal.pos);
-            //    g.DrawImage(portal.model[1], portal.poss);
-            //}
-            //else if (gameTime % 2 == 0)
-            //{
-            //    g.Clear(Color.White);
-
-            //    g.DrawImage(portal.model[2], portal.pos);
-            //    g.DrawImage(portal.model[0], portal.poss);
-            //}
-
-
-            if (gameTime % 400 == 0)
-                {  canvas.Image = scene;}else if (gameTime % 200 == 0){
-                canvas.Image = map;}
-                gameTime++;
+            gameTime++;
+           
         }
+
+            
     }
     class Player
     {
