@@ -179,6 +179,7 @@ namespace Deepportaled
 
                             vrem1[size] = tekush;
                         size++;
+                            //сюды засунуть генерацию портала
                             break;
                     } } }
                 else
@@ -293,18 +294,19 @@ namespace Deepportaled
                     //добавть исход, если комнаты находятся на одной линии
                 }
             }
-
+            
             //разбрасывание рандомных "клеток" для клеточного автомата
             for (int i = 0; i < 16; i++)
             {
-                for (int h = (int)rooms[i].verh.Y-10; h < rooms[i].niz.Y+10; h++)
+                int veroyatnost = 59;
+                for (int h = (int)rooms[i].verh.Y - 30; h < rooms[i].niz.Y + 30; h++)
                 {
-                    
-                    for (int w = (int)rooms[i].verh.X-10; w < rooms[i].niz.X+10; w++)
+
+                    for (int w = (int)rooms[i].verh.X - 30; w < rooms[i].niz.X + 30; w++)
                     {
-                        if (((h< (int)rooms[i].verh.Y) ||(h> rooms[i].niz.Y)) ||((w< (int)rooms[i].verh.X) ||(w> rooms[i].niz.X)))
+                        if (((h>0)&&(w>0)&&(h<scene.Height)&&(w<scene.Width))&&(((h < (int)rooms[i].verh.Y) || (h > rooms[i].niz.Y)) || ((w < (int)rooms[i].verh.X) || (w > rooms[i].niz.X))))
                         {
-                            if (rand.Next(100) > 35)
+                            if (rand.Next(100) > veroyatnost)
                             {
                                 boolmap[h, w] = false;
                             }
@@ -332,14 +334,14 @@ namespace Deepportaled
                                     while ((v < second.Y) && ((w - first.X) > otnoshenie_storon * (v - first.Y))) { v++; }
                                     for (int e = -30; e < -15; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[v + e, w] = false;
                                         }
                                     }
                                     for (int e = 15; e < 30; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[v + e, w] = false;
                                         }
@@ -355,14 +357,14 @@ namespace Deepportaled
                                     while ((v < second.X) && ((w - first.Y) > otnoshenie_storon * (v - first.X))) { v++; }
                                     for (int e = -30; e < -15; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[w, v + e] = false;
                                         }
                                     }
                                     for (int e = 15; e < 30; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[w, v + e] = false;
                                         }
@@ -382,14 +384,14 @@ namespace Deepportaled
                                     while ((v > second.Y) && ((w - first.X) > otnoshenie_storon * Math.Abs(v - first.Y))) { v--; }
                                     for (int e = -30; e < -15; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[v + e, w] = false;
                                         }
                                     }
                                     for (int e = 15; e < 30; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[v + e, w] = false;
                                         }
@@ -405,14 +407,14 @@ namespace Deepportaled
                                     while ((v < second.X) && (Math.Abs(w - first.Y) > otnoshenie_storon * (v - first.X))) { v++; }
                                     for (int e = -30; e < -15; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[w, v + e] = false;
                                         }
                                     }
                                     for (int e = 15; e < 30; e++)
                                     {
-                                        if (rand.Next(100) > 35)
+                                        if (rand.Next(100) > veroyatnost)
                                         {
                                             boolmap[w, v + e] = false;
                                         }
@@ -424,8 +426,111 @@ namespace Deepportaled
                     //добавть исход, если комнаты находятся на одной линии
                 }
             }
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
             //развертвование клеточного автомата
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
+            //
 
+            for (int i = 10; i < scene.Height; i = i + 1)
+            {
+                for (int j = 10; j < scene.Width; j++)
+                {
+                    Point n = new Point(j, i);
+
+                    while ((j < scene.Width) && (boolmap[i, j]))
+                    {
+                        j++;
+                    }
+                    Point m = new Point(j, i);
+                    g.DrawLine(blackpen, n, m);
+
+                    j++;
+
+                }
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                bool[,] boolmap1 = new bool[scene.Height, scene.Width];
+                for (int h = 0; h < scene.Height; h++)
+                {
+                    for (int w = 0; w < scene.Width; w++)
+                    {
+                        boolmap1[h, w] = boolmap[h, w];
+                    }
+                }
+                for (int h = 3; h < scene.Height - 3; h++)
+                {
+                    for (int w = 3; w < scene.Width - 3; w++)
+                    {
+                        int sosedi = 0;
+                        for (int a = h - 2; a < h + 3; a++)
+                        {
+                            for (int s = w - 2; s < w + 3; s++)
+                            {
+                                if ((a != h) || (s != w))
+                                {
+                                    if (boolmap[a, s])
+                                    {
+                                        sosedi++;
+                                    }
+                                }
+
+                            }
+                        }
+                        if (boolmap[h,w]) 
+                        {
+                            if (sosedi >=14) 
+                            {
+                                boolmap1[h, w] = true; 
+                            }
+                            else
+                            {
+                                boolmap1[h, w] = false;
+                            }
+                        } 
+                        else
+                        {
+                            if (sosedi >= 15) 
+                            { 
+                                boolmap1[h, w] = true; 
+                            }
+                            else
+                            {
+                                boolmap1[h, w] = false;
+                            }
+                        }
+                        
+
+                    }
+                }
+
+                for (int h = 0; h < scene.Height; h++)
+                {
+                    for (int w = 0; w < scene.Width; w++)
+                    {
+                        boolmap[h, w] = boolmap1[h, w];
+                    }
+                }
+
+            }
             //тестовая отрисовка в map
             for (int i = 10; i < scene.Height; i = i + 1)
             {
@@ -444,30 +549,32 @@ namespace Deepportaled
 
                 }
             }
-            //тесты
-            for (int i = 0; i < 16; i = i + 1)
-            {
-                Point n = new Point((int)rooms[i].verh.X, (int)rooms[i].verh.Y);
-                Point m = new Point((int)rooms[i].niz.X, (int)rooms[i].verh.Y);
-                Point l = new Point((int)rooms[i].niz.X, (int)rooms[i].niz.Y);
-                Point k = new Point((int)rooms[i].verh.X, (int)rooms[i].niz.Y);
-                Point r = new Point((int)rooms[i].verh.X + ((int)rooms[i].niz.X - (int)rooms[i].verh.X) / 2, (int)rooms[i].verh.Y + ((int)rooms[i].niz.Y - (int)rooms[i].verh.Y) / 2);
-                
-                
-                g.DrawString(rooms[i].conection.ToString(), stand, blackbrush, r);
-                
-                for (int y=0;y< rooms[i].soedinenie;y++)
-                {
-                    Point r1 = new Point((int)rooms[rooms[i].soedinen[y]].verh.X + ((int)rooms[rooms[i].soedinen[y]].niz.X - (int)rooms[rooms[i].soedinen[y]].verh.X) / 2, (int)rooms[rooms[i].soedinen[y]].verh.Y + ((int)rooms[rooms[i].soedinen[y]].niz.Y - (int)rooms[rooms[i].soedinen[y]].verh.Y) / 2);
-                    g.DrawLine(blackpen, r, r1);
-                }
-                g.DrawLine(blackpen, n, m);
-                g.DrawLine(blackpen, l, m);
-                g.DrawLine(blackpen, l, k);
-                g.DrawLine(blackpen, n, k);
 
-            }
-            
+
+            //тесты
+            //for (int i = 0; i < 16; i = i + 1)
+            //{
+            //    Point n = new Point((int)rooms[i].verh.X, (int)rooms[i].verh.Y);
+            //    Point m = new Point((int)rooms[i].niz.X, (int)rooms[i].verh.Y);
+            //    Point l = new Point((int)rooms[i].niz.X, (int)rooms[i].niz.Y);
+            //    Point k = new Point((int)rooms[i].verh.X, (int)rooms[i].niz.Y);
+            //    Point r = new Point((int)rooms[i].verh.X + ((int)rooms[i].niz.X - (int)rooms[i].verh.X) / 2, (int)rooms[i].verh.Y + ((int)rooms[i].niz.Y - (int)rooms[i].verh.Y) / 2);
+
+
+            //    g.DrawString(rooms[i].conection.ToString(), stand, blackbrush, r);
+
+            //    for (int y = 0; y < rooms[i].soedinenie; y++)
+            //    {
+            //        Point r1 = new Point((int)rooms[rooms[i].soedinen[y]].verh.X + ((int)rooms[rooms[i].soedinen[y]].niz.X - (int)rooms[rooms[i].soedinen[y]].verh.X) / 2, (int)rooms[rooms[i].soedinen[y]].verh.Y + ((int)rooms[rooms[i].soedinen[y]].niz.Y - (int)rooms[rooms[i].soedinen[y]].verh.Y) / 2);
+            //        g.DrawLine(blackpen, r, r1);
+            //    }
+            //    g.DrawLine(blackpen, n, m);
+            //    g.DrawLine(blackpen, l, m);
+            //    g.DrawLine(blackpen, l, k);
+            //    g.DrawLine(blackpen, n, k);
+
+            //}
+
 
             portal = new Portal(rand.Next(scene.Height), rand.Next(scene.Width), rand.Next(scene.Height), rand.Next(scene.Width));
         }
@@ -589,8 +696,8 @@ namespace Deepportaled
             //}
 
 
-            if (gameTime % 200 == 0)
-                {  canvas.Image = scene;}else if (gameTime % 100 == 0){
+            if (gameTime % 400 == 0)
+                {  canvas.Image = scene;}else if (gameTime % 200 == 0){
                 canvas.Image = map;}
                 gameTime++;
         }
