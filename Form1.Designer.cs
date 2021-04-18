@@ -57,10 +57,13 @@
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.canvas)).EndInit();
             this.ResumeLayout(false);
+            this.KeyDown += this.onKeyDown;
+            this.KeyUp += this.onKeyUp;
 
         }
 
         #endregion
+
 
         private System.Windows.Forms.PictureBox canvas;
         private System.Windows.Forms.Timer GameTimer;
