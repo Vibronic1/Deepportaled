@@ -18,20 +18,16 @@ namespace Deepportaled
     public partial class Form1 : Form
     {
         // Ресурсы игры
-        public int portal_kolvo = 0;
         public static Random rand = new Random();
         public int gameTime = 0;
         Bitmap scene;
         Graphics g;
         Bitmap map;
         Graphics g1;
-        Pen blackpen;
         Player player;
-        Enemy enemy;
-        Brush blackbrush = new SolidBrush(Color.Black);
-        Portal[] portal = new Portal[10];
-        Font stand = new Font(FontFamily.GenericSansSerif, 50);
+        List<Portal> portal = new List<Portal>();
         List<Enemy> enemies = new List<Enemy>();
+        int slojnost = 1;
         bool keyW = false;
         bool keyA = false;
         bool keyS = false;
@@ -39,22 +35,27 @@ namespace Deepportaled
         bool keySpace = false;
         bool[,] boolmap;
         bool[,] vidimmap;
-        int enemyes = 0;
         public Form1()
         {
             InitializeComponent();
-            GameTimer.Interval = 1000 / 60;
+            GameTimer.Interval = 1000 / 30;
             GameTimer.Start();
             scene = new Bitmap(canvas.Width, canvas.Height);
-            map = new Bitmap(scene);
+            map = new Bitmap(generationMap());
             g = Graphics.FromImage(scene);
             g1 = Graphics.FromImage(map);
-            blackpen = new Pen(Color.Black);
-            generationMap();
+
+
         }
-        private void generationMap()
+        private Bitmap generationMap()
         {
-            portal_kolvo = 0;
+            enemies.RemoveRange(0,enemies.Count);
+            portal.RemoveRange(0, portal.Count);
+            Bitmap scene1;
+            Graphics g11;
+            scene1 = new Bitmap(canvas.Width, canvas.Height);
+            Pen blackpen = new Pen(Color.Black);
+            g11 = Graphics.FromImage(scene1);
             room[] rooms = new room[16];
             rooms[0] = new room(10, 10, scene.Height - 10, scene.Width - 10);
             vidimmap = new bool[canvas.Height, canvas.Width];
@@ -152,15 +153,15 @@ namespace Deepportaled
                             {
                                 if (nach)
                                 {
-                                    portal[portal_kolvo] = new Portal(nach_portal.Y, nach_portal.X, (rooms[tekush].verh.Y + (rooms[tekush].niz.Y - rooms[tekush].verh.Y) / 2), (rooms[tekush].verh.X + (rooms[tekush].niz.X - rooms[tekush].verh.X) / 2));
+                                    portal.Add(new Portal(nach_portal.Y, nach_portal.X, (rooms[tekush].verh.Y + (rooms[tekush].niz.Y - rooms[tekush].verh.Y) / 2), (rooms[tekush].verh.X + (rooms[tekush].niz.X - rooms[tekush].verh.X) / 2)));
                                     nach = false;
-                                    portal_kolvo++;
                                 }
                                 else
                                 {
                                     nach = true;
                                     nach_portal.X = (rooms[tekush].verh.X + (rooms[tekush].niz.X - rooms[tekush].verh.X) / 2);
                                     nach_portal.Y = (rooms[tekush].verh.Y + (rooms[tekush].niz.Y - rooms[tekush].verh.Y) / 2);
+                                    end.room = tekush;
                                 }
                             }
                         }
@@ -179,6 +180,17 @@ namespace Deepportaled
                         size++;
                         prosh = tekush;
                     }
+                    //добавить спавн выхода с уровня
+                    if (nach)
+                    {
+                        end.pos = nach_portal;
+                    }
+                    else
+                    {
+                        end.room =  rand.Next(15);
+                        end.pos.X = (rand.Next((int)rooms[end.room].verh.X + 15, (int)rooms[end.room].niz.X - 15));
+                        end.pos.Y= (rand.Next((int)rooms[end.room].verh.Y + 15, (int)rooms[end.room].niz.Y - 15));
+                    }
                 }
                 //Переход от абстрактных комнат к карте boolmap, состоящей из пикселей
                 boolmap = new bool[scene.Height, scene.Width];
@@ -189,7 +201,7 @@ namespace Deepportaled
                         boolmap[i, j] = true;
                     }
                 }
-                //
+                //заполнение boolmap
                 for (int i = 0; i < 16; i++)
                 {
                     for (int h = (int)rooms[i].verh.Y; h < rooms[i].niz.Y; h++)
@@ -199,8 +211,6 @@ namespace Deepportaled
                             boolmap[h, w] = false;
                         }
                     }
-                    //
-                    //
                     for (int q = 0; q < rooms[i].soedinenie; q++)
                     {
                         PointF first = new PointF((rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 2), (rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 2));
@@ -280,11 +290,11 @@ namespace Deepportaled
                         {
                             double a = (rooms[i].niz.Y - rooms[i].verh.Y) / 2;
                             double b = (rooms[i].niz.X - rooms[i].verh.X) / 2;
-                            double a1 = (rooms[i].niz.Y+30 - (rooms[i].verh.Y-30)) / 2;
-                            double b1 = (rooms[i].niz.X+30 - (rooms[i].verh.X-30)) / 2;
-                           double w1 =( w - (rooms[i].verh.X + b));
+                            double a1 = (rooms[i].niz.Y + 30 - (rooms[i].verh.Y - 30)) / 2;
+                            double b1 = (rooms[i].niz.X + 30 - (rooms[i].verh.X - 30)) / 2;
+                            double w1 = (w - (rooms[i].verh.X + b));
                             double h1 = (h - (rooms[i].verh.Y + a));
-                            if (((h > 0) && (w > 0) && (h < scene.Height) && (w < scene.Width)) && ((((w1*w1)/(b*b))+(((h1*h1)/(a*a))))>1)&& ((((w1 * w1) /(b1*b1))+((h1*h1)/(a1*a1)))< 1))
+                            if (((h > 0) && (w > 0) && (h < scene.Height) && (w < scene.Width)) && ((((w1 * w1) / (b * b)) + (((h1 * h1) / (a * a)))) > 1) && ((((w1 * w1) / (b1 * b1)) + ((h1 * h1) / (a1 * a1))) < 1))
                             {
                                 if (rand.Next(100) > veroyatnost)
                                 {
@@ -293,9 +303,7 @@ namespace Deepportaled
                             }
                         }
                     }
-                    //
-                    
-                    //
+                    //разбрасываение клеток на "проходах" между комнатами
                     for (int q = 0; q < rooms[i].soedinenie; q++)
                     {
                         PointF first = new PointF((rooms[i].verh.X + (rooms[i].niz.X - rooms[i].verh.X) / 2), (rooms[i].verh.Y + (rooms[i].niz.Y - rooms[i].verh.Y) / 2));
@@ -405,21 +413,7 @@ namespace Deepportaled
                         //добавть исход, если комнаты находятся на одной линии
                     }
                 }
-                //
-                //
-               
                 //развертвование клеточного автомата
-                //
-                //                
-
-                //доббавление врагов в комнаты
-                /*for (int i = 0; i < 16; i++)
-                {
-                    for (int e = 0; e < rand.Next(2, 7); e++)
-                    {
-                        enemies.Add(new Enemy(rand.Next((int)rooms[i].verh.Y + 15, (int)rooms[i].niz.Y - 15), rand.Next((int)rooms[i].verh.X + 15, (int)rooms[i].niz.X - 15)));
-                    }
-                }*/
                 for (int i = 0; i < 10; i++)
                 {
                     bool[,] boolmap1 = new bool[scene.Height, scene.Width];
@@ -480,10 +474,21 @@ namespace Deepportaled
                         }
                     }
                 }
+                //спавн игрока и врагов
+                //доббавление врагов в комнаты
+                for (int i = 0; i < 16; i++)
+                {
+                    if (i != end.room)
+                    {
+                        for (int e = 0; e < rand.Next(0, 1+((int)Math.Pow(1.2, slojnost))); e++)
+                        {
+                            enemies.Add(new Enemy((rand.Next((int)rooms[i].verh.X + 15, (int)rooms[i].niz.X - 15)), (rand.Next((int)rooms[i].verh.Y + 15, (int)rooms[i].niz.Y - 15))));
+                        }
+                    }
+                }
                 int start_room = rand.Next(16);
                 player = new Player(rooms[start_room].verh.X + (rooms[start_room].niz.X - rooms[start_room].verh.X) / (rand.Next(20, 31) / 10), rooms[start_room].verh.Y + (rooms[start_room].niz.Y - rooms[start_room].verh.Y) / (rand.Next(20, 31) / 10));
-                 enemy = new Enemy(rooms[start_room].verh.X + (rooms[start_room].niz.X - rooms[start_room].verh.X) / (rand.Next(20, 31) / 10), rooms[start_room].verh.Y + (rooms[start_room].niz.Y - rooms[start_room].verh.Y) / (rand.Next(20, 31) / 10));
-                //тестовая отрисовка в map
+                //отрисовка в битмап для его возвращения в качестве результата
                 for (int i = 10; i < scene.Height; i = i + 1)
                 {
                     for (int j = 10; j < scene.Width; j++)
@@ -494,11 +499,12 @@ namespace Deepportaled
                             j++;
                         }
                         Point m = new Point(j, i);
-                        g1.DrawLine(blackpen, n, m);
+                        g11.DrawLine(blackpen, n, m);
                         j++;
                     }
                 }
             }
+            return scene1;
         }
         private void onKeyDown(object sender, KeyEventArgs e)
         {
@@ -589,9 +595,17 @@ namespace Deepportaled
                 return (ret);
             }
         }
+        public static class end
+        {
+            static public int room;
+            static public PointF pos;
+            static public Point size= new Point(60,100);
+        }
         private void GameTimer_Tick(object sender, EventArgs owe)
         {
+            //сделать пред-уровневый загрузочный экран
             PointF old = new PointF(player.pos.X, player.pos.Y);
+            //обработка движений игрока
             if (keyW)
             {
                 player.acc.Y -= player.speed;
@@ -625,13 +639,14 @@ namespace Deepportaled
             player.pos.Y += player.acc.Y;
             player.acc.X *= player.fade;
             player.acc.Y *= player.fade;
+            //проверка захождение в новый лвл
+            if ((end.pos.X - end.size.X / 2f < player.pos.X) && (end.pos.Y - end.size.Y / 2f < player.pos.Y) && (end.pos.X + end.size.X / 2f > player.pos.X) && (end.pos.Y + end.size.Y / 2f > player.pos.Y))
+            {
+                map=generationMap();
+                slojnost += (int)Math.Pow(0.85, slojnost);
+            }
             // Инверсия ускорения игрока дла предотвращения
             // выхода за границы игровой карты
-            if (gameTime % 2 == 0)
-            {
-                g.Clear(Color.White);
-                g.DrawImage(map, 0, 0);
-            }
             if (boolmap[(int)player.pos.Y, (int)player.pos.X])
             {
                 player.pos.X = old.X;
@@ -652,75 +667,100 @@ namespace Deepportaled
                 player.pos.X = old.X;
                 player.pos.Y = old.Y;
             }
+           g.Clear(Color.White);
             //логика врагов
-            
-                Color color = new Color();
-            color = Color.Red;
-            if (enemy.vidimost(player, boolmap,color))
+            foreach (Enemy enemy in enemies)
             {
+                if (enemy.trigered != 0)
+                {
+                    enemy.trigered--;
+                    g.DrawImage(Enemy.model[2], enemy.pos.X - (enemy.Size.X / 2), enemy.pos.Y - (enemy.Size.Y / 2));
+                }
+                else
+                {
+                    if (gameTime % rand.Next(2, 4) == 0)
+                    {
+                        g.DrawImage(Enemy.model[1], enemy.pos.X - (enemy.Size.X / 2), enemy.pos.Y - (enemy.Size.Y / 2));
+                    }
+                    else
+                    {
+                        g.DrawImage(Enemy.model[0], enemy.pos.X - (enemy.Size.X / 2), enemy.pos.Y - (enemy.Size.Y / 2));
+                    }
+                }
+                if (gameTime % 10 == 0)
+                {
+                    if ((enemy.vidimost(player, boolmap)) && (rand.Next(0, 4) == 0))
+                    {
+                        g.DrawImage(Enemy.model[2], enemy.pos.X - (enemy.Size.X / 2), enemy.pos.Y - (enemy.Size.Y / 2));
+                        enemy.trigered = 3;
+                        enemy.shooting(player);
+                    }
+                }
+                
+                    for (var i = 0; i < enemy.shoots.Count; i++)
+                {
+                    var shot = enemy.shoots[i];
+
+                    // Отрисовка одного снадяра
                     g.FillEllipse(
-                    new SolidBrush(color),
-                     enemy.pos.X - 50 / 2f,
-                    enemy.pos.Y - 50 / 2f,
-                    50,
-                    50
-                );
-                    enemy.shooting(player);
+                        new SolidBrush(Color.Yellow),
+                        shot.pos.X - shot.size / 2f,
+                         shot.pos.Y - shot.size / 2f,
+                        shot.size,
+                        shot.size
+                    );
+
+                    // Изменение позиции снаряда
+                    shot.pos.X += shot.acc.X;
+                    shot.pos.Y += shot.acc.Y;
+                    if ((shot.pos.Y >= 1000) || (shot.pos.Y <= 0) || (shot.pos.X >= 1900) || (shot.pos.X <= 0))
+                    {
+                        enemy.shoots.Remove(enemy.shoots[i]);
+                    }
+                    else
+                    {
+                        if (boolmap[(int)shot.pos.Y, (int)shot.pos.X])
+                        {
+                            enemy.shoots.Remove(enemy.shoots[i]);
+                        }
+                    }
+                    if ((shot.pos.X - shot.size / 2f < player.pos.X) && (shot.pos.Y - shot.size / 2f < player.pos.Y) && (shot.pos.X + shot.size / 2f > player.pos.X) && (shot.pos.Y + shot.size / 2f > player.pos.Y))
+                    {
+                        player.health -= slojnost;
+                    }
                 }
-               
-            
-            for (var i = 0; i < enemy.shoots.Count; i++)
-            {
-                var shot = enemy.shoots[i];
-
-                // Отрисовка одного снадяра
-                g.FillEllipse(
-                    new SolidBrush(Color.FromArgb(255 - (int)(200), Color.Yellow)),
-                    shot.pos.Y - shot.size / 2f,
-                    shot.pos.X - shot.size / 2f,
-                    shot.size,
-                    shot.size
-                );
-
-                // Изменение позиции снаряда
-                shot.pos.X += shot.acc.X;
-                shot.pos.Y += shot.acc.Y;
             }
-                //
-                for (int i = 0; i < portal_kolvo; i++)
+            //отрисовка и логика порталов
+            foreach (Portal portal1 in portal)
             {
-                if (gameTime % 240 == 0) { portal[i].portal_enter(player); }
-                g.DrawImage(player.tekush, player.pos.X - (player.Size.X / 2), player.pos.Y - (player.Size.Y / 2));
-                if (gameTime % 8 == 0)
+                if (gameTime % 120 == 0) { portal1.portal_enter(player); }
+               
+                if (gameTime % 4 == 0)
                 {
-                    portal[i].portal_enter(player);
-                    g.DrawImage(portal[i].model[0], portal[i].pos.X - (portal[i].Size.X / 2), portal[i].pos.Y - (portal[i].Size.Y / 2));
-                    g.DrawImage(portal[i].model[2], portal[i].poss.X - (portal[i].Size.X / 2), portal[i].poss.Y - (portal[i].Size.Y / 2));
-                }
-                else if (gameTime % 4 == 0)
-                {
-                    g.DrawImage(portal[i].model[1], portal[i].pos.X - (portal[i].Size.X / 2), portal[i].pos.Y - (portal[i].Size.Y / 2));
-                    g.DrawImage(portal[i].model[1], portal[i].poss.X - (portal[i].Size.X / 2), portal[i].poss.Y - (portal[i].Size.Y / 2));
+                    portal1.portal_enter(player);
+                    g.DrawImage(portal1.model[0], portal1.pos.X - (portal1.Size.X / 2), portal1.pos.Y - (portal1.Size.Y / 2));
+                    g.DrawImage(portal1.model[2], portal1.poss.X - (portal1.Size.X / 2), portal1.poss.Y - (portal1.Size.Y / 2));
                 }
                 else if (gameTime % 2 == 0)
                 {
-                    g.DrawImage(portal[i].model[2], portal[i].pos.X - (portal[i].Size.X / 2), portal[i].pos.Y - (portal[i].Size.Y / 2));
-                    g.DrawImage(portal[i].model[0], portal[i].poss.X - (portal[i].Size.X / 2), portal[i].poss.Y - (portal[i].Size.Y / 2));
+                    g.DrawImage(portal1.model[1], portal1.pos.X - (portal1.Size.X / 2), portal1.pos.Y - (portal1.Size.Y / 2));
+                    g.DrawImage(portal1.model[1], portal1.poss.X - (portal1.Size.X / 2), portal1.poss.Y - (portal1.Size.Y / 2));
+                }
+                else if (gameTime % 1 == 0)
+                {
+                    g.DrawImage(portal1.model[2], portal1.pos.X - (portal1.Size.X / 2), portal1.pos.Y - (portal1.Size.Y / 2));
+                    g.DrawImage(portal1.model[0], portal1.poss.X - (portal1.Size.X / 2), portal1.poss.Y - (portal1.Size.Y / 2));
                 }
             }
-            if (gameTime % 8 == 0)
-            {
-                canvas.Image = scene;
-            }
-            else if (gameTime % 4 == 0)
-            {
-                canvas.Image = scene;
-            }
-            else if (gameTime % 2 == 0)
-            {
-                canvas.Image = scene;
-            }
-            
+            //отрисовка карты и игрока
+            g.DrawImage(player.tekush, player.pos.X - (player.Size.X / 2), player.pos.Y - (player.Size.Y / 2));
+            g.DrawImage(map, 0, 0);
+            g.DrawImage(Image.FromFile("../../resources/end.png"), end.pos.X - (end.size.X / 2), end.pos.Y - (end.size.Y / 2));
+            g.DrawImage(Image.FromFile("../../resources/player_icon.png"), 0,0);
+            progressBar1.Value = player.health;
+            if (player.health <= 0) { g.Clear(Color.White);label1.Visible = true; label1.Text = "Failed!"; }
+            //финальная отрисовка сцены,кадра,тика)
+            canvas.Image = scene;
             gameTime++;
         }
     }
@@ -741,125 +781,130 @@ namespace Deepportaled
         }
         public Player(float x, float y)
         {
-            this.pos.X = x - 13;
-            this.pos.Y = y - 13;
+            this.pos.X = x;
+            this.pos.Y = y;
             this.acc = new PointF(0, 0);
         }
     }
     class Enemy
     {
+        public PointF Size = new PointF(50, 50);
         public PointF pos;
         public PointF acc;
+        public int trigered;
         public int speed;
         public int attacspeed;
+        public int shotspeed=4;
         public int attac = 10;
         public int health = 50;
         public List<shoot> shoots = new List<shoot>();
+        public static Image[] model = new Image[] { Image.FromFile("../../resources/enemy.png"), Image.FromFile("../../resources/enemy1.png"), Image.FromFile("../../resources/enemy_attack.png") };
         public Enemy(PointF pos_)
         {
             this.pos = pos_;
+            trigered = 0;
         }
         public Enemy(float x, float y)
         {
             this.pos.X = x;
             this.pos.Y = y;
+            trigered = 0;
         }
         public Enemy(int x, int y)
         {
             this.pos.X = x;
             this.pos.Y = y;
+            trigered = 0;
         }
-        public bool vidimost(Player player, bool[,] boolmap, Color color)
+        public bool vidimost(Player player, bool[,] boolmap)//функция возращающая видит ли враг игрока
         {
-           
-
-            double rastx;//растояние между игроком и врагом по x
-            double rasty;// растояние между игроком и врагом по y
+            double rastx=(int) player.pos.X - pos.X;//растояние между игроком и врагом по x
+            double rasty= (int)player.pos.Y - pos.Y;// растояние между игроком и врагом по y
             if (player.pos.X - pos.X > 0)
             {
-                rastx = player.pos.X - pos.X;
-                if (player.pos.Y - pos.Y > 0)
-                {
-                    rasty = player.pos.Y - pos.Y;
+                    //если игрок в право относительно врага
                     for (int i = (int)player.pos.X; i > pos.X; i--)
                     {
-                        if (boolmap[(int)(player.pos.Y - (rasty / rastx * Math.Abs(i - pos.X))), i])
+                        if (boolmap[(int)(pos.Y + (rasty / rastx * Math.Abs(i - pos.X))), i])
                         {
-                            color = Color.Yellow;
                             return false;
                         }
                     }
-                }
-                else if (pos.Y - player.pos.Y > 0)
-                {
-                    rasty = pos.Y - player.pos.Y;
-                    for (int i = (int)player.pos.X; i > pos.X; i--)
-                    {
-                        if (boolmap[(int)(player.pos.Y + (rasty/rastx* Math.Abs(i- pos.X))), i])
-                        {
-                            color = Color.Green;
-                            return false;
-                        }
-                    }
-
-                }
-
             }
             else if ((pos.X - player.pos.X > 0))
             {
-                rastx = pos.X - player.pos.X;
-                if (player.pos.Y - pos.Y > 0)
-                {
-                    rasty = player.pos.Y - pos.Y;
+                    //если игрок в лево относительно врага
                     for (int i = (int)player.pos.X; i < (int)pos.X; i++)
                     {
-                        if (boolmap[(int)(player.pos.Y - (rasty / rastx * Math.Abs(i- player.pos.X))), i])
+                    if (boolmap[(int)(player.pos.Y + (rasty / rastx *Math.Abs(i - player.pos.X))), i])
                         {
-                            color = Color.Red;
                             return false;
                         }
                     }
-                }
-                else if ((int)(pos.Y - player.pos.Y) > 0)
-                {
-                    rasty = (int)(pos.Y - player.pos.Y);
-                    for (int i = (int)player.pos.X; i < (int)pos.X; i++)
-                    {
-                        if (boolmap[(int)(player.pos.Y + (rasty / rastx * Math.Abs(i-player.pos.X))), i])
-                        {
-                            color = Color.Blue;
-                            return false;
-                        }
-                    }
-                }
             }
             return true;
         }
-        public void shooting(Player player)
+        public void shooting(Player player)//функция стрельбы врага по игроку
         {
-           
-            
-                //попытка определения куда стреляет бот
-                bool popadanie = false;
-                int tick = 0;
-                PointF accc = new PointF(0, 0);
-
-                while (popadanie)
+            bool popadanie = true;
+            int tick = 1;
+            PointF predpolojPlayer = new PointF(player.pos.X + (player.acc.X * tick), player.pos.Y + (player.acc.Y * tick));
+            PointF accc = new PointF(0, 0);
+            accc.X = (predpolojPlayer.X - pos.X) / tick;
+            accc.Y = (predpolojPlayer.Y - pos.Y) / tick;
+            while ((popadanie))
+            {
+                predpolojPlayer = new PointF(player.pos.X + (player.acc.X * tick), player.pos.Y + (player.acc.Y * tick));
+                accc.X = (predpolojPlayer.X - pos.X) / tick;
+                accc.Y = (predpolojPlayer.Y - pos.Y) / tick;
+                if ((Math.Abs(player.acc.X) + Math.Abs(player.acc.Y) < shotspeed+0.2f) && (Math.Abs(player.acc.X) + Math.Abs(player.acc.Y) > shotspeed - 0.2f))
                 {
-                    accc.X = ((player.pos.X + (player.acc.X * tick)) - pos.X) / ((player.pos.Y + (player.acc.Y * tick)) - pos.Y) * 2;
-                    accc.Y = ((player.pos.Y + (player.acc.Y * tick)) - pos.Y) / ((player.pos.X + (player.acc.X * tick)) - pos.X) * 2;
-                    if ((player.pos.X + (player.acc.X * tick)) == (pos.X + accc.X * tick) && ((player.pos.Y + (player.acc.Y * tick)) == (pos.Y + accc.Y * tick))) { popadanie = true; }
+                    if ((Math.Abs(accc.X) + Math.Abs(accc.Y) < shotspeed + 0.2f) && (Math.Abs(accc.X) + Math.Abs(accc.Y) > shotspeed - 0.2f))
+                    {
+                        shoots.Add(new shoot(pos, accc));
+                        popadanie = false;
+                    }
                 }
-                shoots.Add(new shoot(pos, accc));
-            
+                if ((Math.Abs(player.acc.X) + Math.Abs(player.acc.Y) <= shotspeed + 0.2f) && !(Math.Abs(player.acc.X) + Math.Abs(player.acc.Y) >= shotspeed - 0.2f))
+                {
+                    float tick1 = 1;
+                    while (popadanie)
+                    {
+                        accc.X = (predpolojPlayer.X  - pos.X) / tick1;
+                        accc.Y = (predpolojPlayer.Y  - pos.Y) / tick1;
+                        if ((Math.Abs(accc.X) + Math.Abs(accc.Y) < shotspeed + 0.2f) && (Math.Abs(accc.X) + Math.Abs(accc.Y) > shotspeed - 0.2f))
+                        {
+                            shoots.Add(new shoot(pos, accc));
+                            popadanie = false;
+                        }
+                        tick1+=0.01f;
+                        
+                    }
+                }
+                if (!(Math.Abs(player.acc.X) + Math.Abs(player.acc.Y) <= shotspeed + 0.2f) && (Math.Abs(player.acc.X) + Math.Abs(player.acc.Y) >= shotspeed - 0.2f))
+                {
+                    float tick1 = 1;
+                    while (popadanie)
+                    {accc.X = (predpolojPlayer.X  - pos.X) / tick1;
+                    accc.Y = (predpolojPlayer.Y  - pos.Y) / tick1;
+                        if ((Math.Abs(accc.X) + Math.Abs(accc.Y) < shotspeed + 0.2f) && (Math.Abs(accc.X) + Math.Abs(accc.Y) > shotspeed - 0.2f))
+                        {
+                            shoots.Add(new shoot(pos, accc));
+                            popadanie = false;
+                        }
+                        tick1+=0.01f;
+                    }
+                }
+                tick++;
+            }
         }
     }
     public class shoot
     {
         public PointF pos;
         public PointF acc;
-            public float size=5f;
-            public shoot(PointF pos, PointF acc)
+        public float size = 5f;
+        public shoot(PointF pos, PointF acc)
         {
             this.acc = acc;
             this.pos = pos;
@@ -870,7 +915,7 @@ namespace Deepportaled
         public Point Size = new Point(60, 60);
         public PointF pos;
         public PointF poss;
-        public void portal_enter(Player player)
+        public void portal_enter(Player player)//функция телепортации портала
         {//если зашел в pos
             if (((player.pos.X - player.Size.X / 2) > (pos.X - Size.X / 2)) && ((player.pos.X + player.Size.X / 2) < (pos.X + Size.X / 2)) && ((player.pos.Y - player.Size.Y / 2) > (pos.Y - Size.Y / 2)) && ((player.pos.Y + player.Size.Y / 2) < (pos.Y + Size.Y / 2)))
             {

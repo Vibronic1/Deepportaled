@@ -31,6 +31,8 @@
             this.components = new System.ComponentModel.Container();
             this.canvas = new System.Windows.Forms.PictureBox();
             this.GameTimer = new System.Windows.Forms.Timer(this.components);
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.canvas)).BeginInit();
             this.SuspendLayout();
             // 
@@ -47,11 +49,30 @@
             this.GameTimer.Interval = 16;
             this.GameTimer.Tick += new System.EventHandler(this.GameTimer_Tick);
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(25, 0);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(100, 13);
+            this.progressBar1.TabIndex = 1;
+            // 
+            // label1
+            // 
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 72F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.label1.Location = new System.Drawing.Point(300, 200);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(1500, 500);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "\r\n";
+            this.label1.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1924, 981);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.canvas);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -59,7 +80,6 @@
             this.ResumeLayout(false);
             this.KeyDown += this.onKeyDown;
             this.KeyUp += this.onKeyUp;
-
         }
 
         #endregion
@@ -67,6 +87,8 @@
 
         private System.Windows.Forms.PictureBox canvas;
         private System.Windows.Forms.Timer GameTimer;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Label label1;
     }
 }
 
